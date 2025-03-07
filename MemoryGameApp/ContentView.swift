@@ -41,12 +41,24 @@ class MemoryGameViewModel: ObservableObject {
     
     func resetGame() {
         let emojis = ["🍎", "🍌", "🍒", "🍇", "🥝", "🍉"]
-        let shuffledCards = (emojis + emojis).shuffled().map {Card(content:$0)}
-        self.cards = shuffledCards
+        let newCards = (emojis + emojis).shuffled().map {Card(content:$0)}
+        
+        withAnimation(.easeInOut(duration: 0.1)) {
+            self.cards.indices.forEach { self.cards[$0].isFlipped = false }
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+            let shuffledCards = newCards.shuffled()
+            withAnimation(.spring(response: 0.8, dampingFraction: 0.7, blendDuration: 0.5)) {
+                self.cards = shuffledCards
+            }
+        }
+        
         self.selectedIndices.removeAll()
         self.score = 0
         self.attempts = 0
         self.matches = 0
+        
     }
     
     func selectCard(_ index: Int) {
